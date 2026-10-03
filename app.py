@@ -537,24 +537,21 @@ def admin_login():
         "reset": "Your password was reset. Sign in with the new password.",
     }.get(request.args.get("status"))
     if request.method == "POST":
-        u = request.form.get("username", "").strip()
-        p = request.form.get("password", "")
+       error = "Invalid username or password."
+print("LOGIN FAIL | typed user len", len(u), "expected", len(ADMIN_USERNAME),
+      "| typed pass len", len(p), "expected", len(ADMIN_PASSWORD), flush=True)
+        # Constant-time comparison to avoid timing attacks
+        valid_user = bool(ADMIN_USERNAME) and hmac.compare_digest(u, ADMIN_USERNAME)
+        valid_pass = verify_admin_password(p)
+        if valid_user and valid_pass:
+            session.clear()
+            session["role"] = "admin"
+            session.permanent = False
+            nxt = request.args.get("next") or url_for("admin_dashboard")
+            if not nxt.startswith("/") or nxt.startswith("//") or "\\" in nxt:
+                nxt = url_for("admin_dashboard")
+            return redirect(nxt)
         error = "Invalid username or password."
-        if u and p:
-            print("LOGIN FAIL | typed user len", len(u), "expected", len(ADMIN_USERNAME),
-                  "| typed pass len", len(p), "expected", len(ADMIN_PASSWORD), flush=True)
-            # Constant-time comparison to avoid timing attacks
-            valid_user = bool(ADMIN_USERNAME) and hmac.compare_digest(u, ADMIN_USERNAME)
-            valid_pass = verify_admin_password(p)
-            if valid_user and valid_pass:
-                session.clear()
-                session["role"] = "admin"
-                session.permanent = False
-                nxt = request.args.get("next") or url_for("admin_dashboard")
-                if not nxt.startswith("/") or nxt.startswith("//") or "\\" in nxt:
-                    nxt = url_for("admin_dashboard")
-                return redirect(nxt)
-            error = "Invalid username or password."
     return render_template("admin/login.html", error=error, message=message)
 
 
