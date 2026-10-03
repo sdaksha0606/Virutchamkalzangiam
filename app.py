@@ -109,6 +109,8 @@ twilio_client = TwilioClient(TWILIO_SID, TWILIO_TOKEN)
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 OFFICE_RECOVERY_EMAIL = os.environ.get("OFFICE_RECOVERY_EMAIL", "").strip().lower()
+print("DEBUG admin user set:", bool(ADMIN_USERNAME), len(ADMIN_USERNAME or ""),
+      "| pass set:", bool(ADMIN_PASSWORD), len(ADMIN_PASSWORD or ""), flush=True)
 SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "")
