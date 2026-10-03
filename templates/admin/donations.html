@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Donations — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f0f4f2;color:#0d1f16;display:flex;height:100vh;overflow:hidden}
+.sidebar{width:230px;flex-shrink:0;background:linear-gradient(180deg,#0d3d20,#103a5e);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+.sb-logo .em{font-size:1.6rem}
+.sb-logo h2{font-size:.88rem;font-weight:700;color:#fff;line-height:1.3}
+.sb-logo p{font-size:.65rem;color:rgba(255,255,255,.45);margin-top:1px}
+nav{padding:12px 0;flex:1}
+.nav-sec{padding:10px 16px 4px;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 16px;background:none;border:none;color:rgba(255,255,255,.7);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s;text-align:left;border-left:3px solid transparent;text-decoration:none}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#4dbb6e}
+.nav-icon{font-size:.9rem;width:18px;text-align:center}
+.sb-bottom{padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:8px}
+.btn-site{display:block;text-align:center;background:rgba(255,255,255,.12);color:#fff;padding:8px;border-radius:8px;font-size:.78rem;font-weight:600;text-decoration:none;transition:all .2s}
+.btn-site:hover{background:rgba(255,255,255,.22)}
+.btn-logout{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);font-size:.78rem;text-decoration:none;transition:color .2s;justify-content:center}
+.btn-logout:hover{color:#fff}
+.main{flex:1;display:flex;flex-direction:column;overflow-y:auto}
+.topbar{background:#fff;padding:16px 24px;border-bottom:2px solid #e8f7ee;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h1{font-size:1.2rem;color:#0d3d20}
+.topbar p{font-size:.8rem;color:#6b8377;margin-top:2px}
+.topbar-actions{display:flex;gap:10px}
+.btn{padding:9px 18px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-export{background:#103a5e;color:#fff}
+.btn-export:hover{background:#0a2540}
+.btn-refresh{background:#e8f7ee;color:#1a7a3c}
+.btn-refresh:hover{background:#1a7a3c;color:#fff}
+.content{padding:24px}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(13,61,32,.06);border-top:4px solid #4dbb6e}
+.stat-card.blue{border-top-color:#2680b8}
+.stat-icon{font-size:1.4rem;margin-bottom:8px}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:#0d3d20}
+.stat-lbl{font-size:.78rem;color:#6b8377;margin-top:4px}
+
+.table-card{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(13,61,32,.06);overflow:hidden}
+.table-header{padding:18px 20px;border-bottom:2px solid #e8f7ee;display:flex;align-items:center;justify-content:space-between}
+.table-header h2{font-size:.95rem;color:#0d3d20;font-weight:700}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:.75rem;color:#1a7a3c;font-weight:600}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22a44e;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{text-align:left;padding:12px 16px;background:#f8fdf9;color:#3a5244;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #e8f7ee;white-space:nowrap}
+tbody td{padding:12px 16px;border-bottom:1px solid #f0f4f2;color:#0d1f16}
+tbody tr:hover{background:#f8fdf9}
+.amount-cell{font-weight:700;color:#1a7a3c;font-family:'Playfair Display',serif}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:.7rem;font-weight:700}
+.status-success{background:#e8f7ee;color:#1a7a3c}
+.status-failed{background:#fff5f5;color:#c53030}
+.sms-yes{color:#1a7a3c;font-weight:600}
+.sms-no{color:#c53030}
+.cause-tag{background:#dff0fa;color:#1a5276;padding:2px 8px;border-radius:100px;font-size:.7rem;font-weight:600}
+.empty-state{padding:60px 20px;text-align:center;color:#6b8377}
+.empty-state .em{font-size:2.5rem;margin-bottom:12px}
+.pid-cell{font-family:monospace;font-size:.76rem;color:#6b8377}
+
+@media(max-width:900px){.stats-row{grid-template-columns:1fr 1fr}.sidebar{display:none}table{font-size:.78rem}thead th,tbody td{padding:8px 10px}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo"><div class="em">🌿</div><div><h2>Virutcham Admin</h2><p>Website Editor</p></div></div>
+  <nav>
+    <div class="nav-sec">Main</div>
+    <a href="/admin" class="nav-btn"><span class="nav-icon">✏️</span>Content Editor</a>
+    <a href="/admin/donations" class="nav-btn active"><span class="nav-icon">💰</span>Donations</a>
+  </nav>
+  <div class="sb-bottom">
+    <a href="/" target="_blank" class="btn-site">🌐 View Live Website</a>
+    <a href="{{ url_for('admin_change_password') }}" class="btn-site">🔑 Change Password</a>
+    <a href="/admin/logout" class="btn-logout">⬅ Logout</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>💰 Donations Received</h1>
+      <p>Track every donation instantly — no need to log into Razorpay</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-refresh" onclick="refreshData()">🔄 Refresh</button>
+      <a href="/admin/donations/export" class="btn btn-export">⬇ Export CSV</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <div class="stat-icon">💚</div>
+        <div class="stat-val" id="stat-today-amount">₹{{ "{:,.0f}".format(stats.today_amount) }}</div>
+        <div class="stat-lbl">Received Today</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-icon">📋</div>
+        <div class="stat-val" id="stat-today-count">{{ stats.today_count }}</div>
+        <div class="stat-lbl">Donations Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌿</div>
+        <div class="stat-val" id="stat-total-amount">₹{{ "{:,.0f}".format(stats.total_amount) }}</div>
+        <div class="stat-lbl">Total Received (All Time)</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-icon">👥</div>
+        <div class="stat-val" id="stat-total-count">{{ stats.total_count }}</div>
+        <div class="stat-lbl">Total Donors (All Time)</div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Recent Donations</h2>
+        <div class="live-badge"><span class="live-dot"></span>Auto-updating</div>
+      </div>
+
+      {% if donations %}
+      <table>
+        <thead>
+          <tr>
+            <th>Date &amp; Time</th>
+            <th>Donor Name</th>
+            <th>Phone</th>
+            <th>Cause</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>SMS Sent</th>
+            <th>Payment ID</th>
+          </tr>
+        </thead>
+        <tbody id="donationsBody">
+          {% for d in donations %}
+          <tr>
+            <td>{{ d.date }}</td>
+            <td>{{ d.name }}</td>
+            <td>{{ d.phone }}</td>
+            <td><span class="cause-tag">{{ d.cause }}</span></td>
+            <td class="amount-cell">₹{{ "{:,.0f}".format(d.amount) }}</td>
+            <td>
+              {% if d.status == 'success' %}
+                <span class="status-badge status-success">✓ Success</span>
+              {% else %}
+                <span class="status-badge status-failed">✗ Failed</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if d.sms_sent %}
+                <span class="sms-yes">✓ Sent</span>
+              {% else %}
+                <span class="sms-no">✗ Not sent</span>
+              {% endif %}
+            </td>
+            <td class="pid-cell">{{ d.payment_id }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <div class="em">💚</div>
+        <p>No donations yet. Once someone donates, it will appear here instantly.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+async function refreshData() {
+  try {
+    const res = await fetch('/admin/donations/data');
+    const data = await res.json();
+
+    document.getElementById('stat-today-amount').textContent = '₹' + Math.round(data.stats.today_amount).toLocaleString('en-IN');
+    document.getElementById('stat-today-count').textContent  = data.stats.today_count;
+    document.getElementById('stat-total-amount').textContent = '₹' + Math.round(data.stats.total_amount).toLocaleString('en-IN');
+    document.getElementById('stat-total-count').textContent  = data.stats.total_count;
+
+    if (data.donations.length > 0) {
+      const tbody = document.getElementById('donationsBody');
+      if (tbody) {
+        tbody.innerHTML = data.donations.map(d => `
+          <tr>
+            <td>${d.date}</td>
+            <td>${d.name}</td>
+            <td>${d.phone}</td>
+            <td><span class="cause-tag">${d.cause}</span></td>
+            <td class="amount-cell">₹${Math.round(d.amount).toLocaleString('en-IN')}</td>
+            <td>${d.status === 'success' ? '<span class="status-badge status-success">✓ Success</span>' : '<span class="status-badge status-failed">✗ Failed</span>'}</td>
+            <td>${d.sms_sent ? '<span class="sms-yes">✓ Sent</span>' : '<span class="sms-no">✗ Not sent</span>'}</td>
+            <td class="pid-cell">${d.payment_id || ''}</td>
+          </tr>
+        `).join('');
+      } else {
+        location.reload(); // first donation ever — reload to show table instead of empty state
+      }
+    }
+  } catch(e) {
+    console.error('Refresh failed', e);
+  }
+}
+
+// Auto-refresh every 15 seconds
+setInterval(refreshData, 15000);
+</script>
+</body>
+</html>

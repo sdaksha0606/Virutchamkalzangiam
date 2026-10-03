@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ ui.page_title }} — {{ c.ngo_name }}</title>
+  <meta name="description" content="{{ ui.donate_description }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/donate.css') }}" />
+  <style>
+    :root{
+      --green-700: {{ c._color_green|default('#1a7a3c') }};
+      --green-900: {{ c._color_dark|default('#0d3d20') }};
+      --blue-700:  {{ c._color_blue|default('#1a5276') }};
+      --off-white: {{ c._color_bg|default('#f8fdf9') }};
+    }
+    {% if c._font_size == 'large' %}body{ font-size: 18px; }{% endif %}
+    {% if c._font_size == 'xlarge' %}body{ font-size: 20px; }{% endif %}
+  </style>
+  <!-- Razorpay Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body class="donate-page">
+
+<!-- ── Accessibility + Language Bar ─────────────────────────────────────── -->
+<div class="a11y-bar">
+  <div class="a11y-inner">
+    <div class="lang-switch">
+      {% for code, label in languages.items() %}
+        <a href="{{ url_for('donate', lang=code) }}" class="lang-btn {% if code == current_lang %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ── Minimal Nav ─────────────────────────────────────────────────────── -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="{{ url_for('index', lang=current_lang) }}" class="nav-logo">
+      <div class="logo-emblem">🌿</div>
+      <div class="logo-text">
+        <span class="logo-main">{{ c.ngo_short }}</span>
+        <span class="logo-sub">{{ ui.logo_sub }}</span>
+      </div>
+    </a>
+    <a href="{{ url_for('index', lang=current_lang) }}" class="btn-ghost small">{{ ui.back_home }}</a>
+  </div>
+</nav>
+
+<!-- ── Main Donation Section ───────────────────────────────────────────── -->
+<main class="donate-main">
+
+  <!-- Left panel — cause info -->
+  <aside class="donate-left">
+    <div class="donate-left-inner">
+      <h2 class="donate-aside-title">{{ ui.generosity_title }}</h2>
+      <div class="donate-impact-items">
+        <div class="impact-row">
+          <span class="impact-amt">₹100</span>
+          <span class="impact-desc">{{ ui.impact_feed }}</span>
+        </div>
+        <div class="impact-row">
+          <span class="impact-amt">₹250</span>
+          <span class="impact-desc">{{ ui.impact_supplies }}</span>
+        </div>
+        <div class="impact-row">
+          <span class="impact-amt">₹500</span>
+          <span class="impact-desc">{{ ui.impact_skill }}</span>
+        </div>
+        <div class="impact-row">
+          <span class="impact-amt">₹1,000</span>
+          <span class="impact-desc">{{ ui.impact_shelter }}</span>
+        </div>
+        <div class="impact-row">
+          <span class="impact-amt">₹5,000</span>
+          <span class="impact-desc">{{ ui.impact_year }}</span>
+        </div>
+        <div class="impact-row">
+          <span class="impact-amt">₹10,000</span>
+          <span class="impact-desc">{{ ui.impact_kitchen }}</span>
+        </div>
+      </div>
+
+      <div class="donate-trust">
+        <div class="trust-badge">{{ ui.trust_razorpay }}</div>
+        <div class="trust-badge">{{ ui.trust_registered }}</div>
+        <div class="trust-badge">{{ ui.trust_tax }}</div>
+      </div>
+
+      <!-- Background image — replace donate_side.jpg -->
+      <div class="donate-side-img">
+        <img src="/static/images/donate_side.jpg" alt="{{ ui.community_alt }}" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" />
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right panel — the form -->
+  <section class="donate-right">
+    <div class="donate-form-wrap">
+
+      <!-- Step indicator -->
+      <div class="steps-indicator">
+        <div class="step active" id="step-ind-1">
+          <div class="step-num">1</div>
+          <div class="step-label">{{ ui.step_details }}</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-2">
+          <div class="step-num">2</div>
+          <div class="step-label">{{ ui.step_amount }}</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-3">
+          <div class="step-num">3</div>
+          <div class="step-label">{{ ui.step_payment }}</div>
+        </div>
+      </div>
+
+      <!-- ─────────────── STEP 1: Personal Details ─────────────── -->
+      <div class="donate-step" id="step-1">
+        <h2 class="step-title">{{ ui.donor_heading }}</h2>
+        <p class="step-sub">{{ ui.receipt_intro }}</p>
+
+        <div class="field-group">
+          <label for="donor-name">{{ ui.full_name }}</label>
+          <input type="text" id="donor-name" placeholder="{{ ui.name_placeholder }}" autocomplete="name" required />
+          <span class="field-error" id="err-name"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="donor-phone">
+            {{ ui.mobile_number }}
+            <span class="field-hint">{{ ui.sms_receipt }}</span>
+          </label>
+          <div class="phone-wrap">
+            <span class="phone-prefix">+91</span>
+            <input type="tel" id="donor-phone" placeholder="9876543210" maxlength="10" autocomplete="tel" required />
+          </div>
+          <span class="field-error" id="err-phone"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="donor-email">
+            {{ ui.email_address }} *
+            <span class="field-hint">{{ ui.email_receipt }}</span>
+          </label>
+          <input type="email" id="donor-email" placeholder="{{ ui.email_placeholder }}" autocomplete="email" required />
+          <span class="field-error" id="err-email"></span>
+        </div>
+
+        <div class="field-group optional-row">
+          <input type="checkbox" id="anon-check" />
+          <label for="anon-check" class="checkbox-label">{{ ui.anonymous }}</label>
+        </div>
+
+        <button class="btn-primary full" onclick="goToStep2()">{{ ui.continue }}</button>
+      </div>
+
+      <!-- ─────────────── STEP 2: Choose Amount ─────────────── -->
+      <div class="donate-step hidden" id="step-2">
+        <h2 class="step-title">{{ ui.choose_donation }}</h2>
+        <p class="step-sub">{{ ui.choose_donation_intro }}</p>
+
+        <div class="field-group">
+          <label>{{ ui.donate_towards }}</label>
+          <div class="cause-chips">
+            <button class="chip active" data-cause="general" onclick="selectCause(this, 'general')">🌿 {{ ui.cause_general }}</button>
+            <button class="chip" data-cause="women" onclick="selectCause(this, 'women')">👩 {{ ui.cause_women }}</button>
+            <button class="chip" data-cause="trans" onclick="selectCause(this, 'trans')">🏳️‍⚧️ {{ ui.cause_trans }}</button>
+            <button class="chip" data-cause="children" onclick="selectCause(this, 'children')">📚 {{ ui.cause_children }}</button>
+            <button class="chip" data-cause="kitchen" onclick="selectCause(this, 'kitchen')">🍳 {{ ui.cause_kitchen }}</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>{{ ui.select_amount }}</label>
+          <div class="amount-grid">
+            <button class="amt-btn" onclick="selectAmt(this, 100)">₹100</button>
+            <button class="amt-btn" onclick="selectAmt(this, 250)">₹250</button>
+            <button class="amt-btn active" onclick="selectAmt(this, 500)">₹500</button>
+            <button class="amt-btn" onclick="selectAmt(this, 1000)">₹1,000</button>
+            <button class="amt-btn" onclick="selectAmt(this, 2000)">₹2,000</button>
+            <button class="amt-btn" onclick="selectAmt(this, 5000)">₹5,000</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="custom-amount">{{ ui.custom_amount }}</label>
+          <input type="number" id="custom-amount" placeholder="{{ ui.amount_placeholder }}" min="10" oninput="setCustomAmt(this.value)" />
+          <span class="field-error" id="err-amount"></span>
+        </div>
+
+        <div class="amount-summary">
+          {{ ui.summary_start }} <strong id="summary-amount">₹500</strong> {{ ui.summary_towards }} <strong id="summary-cause">{{ ui.cause_general }}</strong>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn-ghost" onclick="goToStep1()">{{ ui.back }}</button>
+          <button class="btn-primary" onclick="goToStep3()">{{ ui.proceed_pay }}</button>
+        </div>
+      </div>
+
+      <!-- ─────────────── STEP 3: Payment ─────────────── -->
+      <div class="donate-step hidden" id="step-3">
+        <h2 class="step-title">{{ ui.secure_payment }}</h2>
+        <p class="step-sub">{{ ui.payment_intro }}</p>
+
+        <div class="payment-summary-card">
+          <div class="ps-row">
+            <span>{{ ui.donor }}</span><strong id="ps-name">—</strong>
+          </div>
+          <div class="ps-row">
+            <span>{{ ui.cause }}</span><strong id="ps-cause">—</strong>
+          </div>
+          <div class="ps-row total">
+            <span>{{ ui.total }}</span><strong id="ps-amount">₹—</strong>
+          </div>
+        </div>
+
+        <div class="payment-methods">
+          <div class="pm-grid">
+            <div class="pm-item active" onclick="selectPM(this,'upi')">
+              <span class="pm-icon">📱</span>
+              <span>UPI</span>
+              <span class="pm-sub">GPay, PhonePe, Paytm</span>
+            </div>
+            <div class="pm-item" onclick="selectPM(this,'card')">
+              <span class="pm-icon">💳</span>
+              <span>{{ ui.card }}</span>
+              <span class="pm-sub">{{ ui.debit_credit }}</span>
+            </div>
+            <div class="pm-item" onclick="selectPM(this,'netbanking')">
+              <span class="pm-icon">🏦</span>
+              <span>{{ ui.net_banking }}</span>
+              <span class="pm-sub">{{ ui.all_banks }}</span>
+            </div>
+          </div>
+          <p class="pm-note">{{ ui.payment_note }}</p>
+        </div>
+
+        <button class="btn-primary full pay-btn" id="payBtn" onclick="initiatePayment()">
+          <span id="payBtnText">{{ ui.pay_securely }} ₹500 🔒</span>
+          <span class="btn-spinner hidden" id="paySpinner">⏳ {{ ui.processing }}</span>
+        </button>
+
+        <div class="step-nav">
+          <button class="btn-ghost" onclick="goToStep2()">{{ ui.change_amount }}</button>
+        </div>
+      </div>
+
+      <!-- ─────────────── SUCCESS SCREEN ─────────────── -->
+      <div class="donate-step hidden success-screen" id="step-success">
+        <div class="success-icon">✅</div>
+        <h2>{{ ui.thank_you }}</h2>
+        <p class="success-msg">{{ ui.donation_success_prefix }}<strong id="success-amount"></strong>{{ ui.donation_success_suffix }}</p>
+        <p class="success-sms" id="success-sms">{{ ui.sms_sent }}</p>
+        <div class="success-ref">
+          {{ ui.payment_id }} <span id="success-pid"></span>
+        </div>
+        <p class="success-quote">{{ ui.success_quote }}</p>
+        <div class="success-actions">
+          <a href="{{ url_for('index', lang=current_lang) }}" class="btn-primary">{{ ui.back_home_button }}</a>
+          <button class="btn-ghost" onclick="shareWhatsApp()">{{ ui.share_whatsapp }}</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  const state = {
+    name: "", email: "", phone: "", anonymous: false,
+    amount: 500, cause: "general", paymentMethod: "upi"
+  };
+
+  const RAZORPAY_KEY = "{{ razorpay_key }}";
+  const NGO_NAME     = "{{ c.ngo_name }}";
+  const UI_TEXT      = {{ ui | tojson }};
+
+  // ── Navigation ─────────────────────────────────────────────────────────────
+  function showStep(n) {
+    document.querySelectorAll(".donate-step").forEach(s => s.classList.add("hidden"));
+    document.getElementById(`step-${n}`).classList.remove("hidden");
+    document.querySelectorAll(".step").forEach((s, i) => {
+      s.classList.toggle("active", i < n);
+      s.classList.toggle("done", i < n - 1);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function goToStep1() { showStep(1); }
+  function goToStep2() {
+    if (!validateStep1()) return;
+    state.name      = document.getElementById("donor-name").value.trim();
+    state.phone     = document.getElementById("donor-phone").value.trim();
+    state.email     = document.getElementById("donor-email").value.trim();
+    state.anonymous = document.getElementById("anon-check").checked;
+    showStep(2);
+  }
+  function goToStep3() {
+    if (state.amount < 10) {
+      document.getElementById("err-amount").textContent = UI_TEXT.amount_invalid;
+      return;
+    }
+    document.getElementById("err-amount").textContent = "";
+    // Update summary
+    document.getElementById("ps-name").textContent   = state.anonymous ? UI_TEXT.anonymous_name : state.name;
+    document.getElementById("ps-cause").textContent  = causeLabel(state.cause);
+    document.getElementById("ps-amount").textContent = `₹${state.amount.toLocaleString("en-IN")}`;
+    document.getElementById("payBtnText").textContent = `${UI_TEXT.pay_securely} ₹${state.amount.toLocaleString("en-IN")} 🔒`;
+    showStep(3);
+  }
+
+  // ── Step 1 Validation ──────────────────────────────────────────────────────
+  function validateStep1() {
+    let valid = true;
+    const name  = document.getElementById("donor-name").value.trim();
+    const phone = document.getElementById("donor-phone").value.trim();
+    const email = document.getElementById("donor-email").value.trim();
+
+    document.getElementById("err-name").textContent  = "";
+    document.getElementById("err-phone").textContent = "";
+    document.getElementById("err-email").textContent = "";
+
+    if (!name) { document.getElementById("err-name").textContent = UI_TEXT.name_required; valid = false; }
+    if (!/^\d{10}$/.test(phone)) { document.getElementById("err-phone").textContent = UI_TEXT.phone_invalid; valid = false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById("err-email").textContent = UI_TEXT.email_invalid; valid = false; }
+    return valid;
+  }
+
+  // ── Amount & Cause Selectors ───────────────────────────────────────────────
+  function selectAmt(btn, amt) {
+    document.querySelectorAll(".amt-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("custom-amount").value = "";
+    state.amount = amt;
+    updateSummary();
+  }
+  function setCustomAmt(val) {
+    document.querySelectorAll(".amt-btn").forEach(b => b.classList.remove("active"));
+    state.amount = parseFloat(val) || 0;
+    updateSummary();
+  }
+  function selectCause(btn, cause) {
+    document.querySelectorAll(".chip").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    state.cause = cause;
+    updateSummary();
+  }
+  function selectPM(el, method) {
+    document.querySelectorAll(".pm-item").forEach(e => e.classList.remove("active"));
+    el.classList.add("active");
+    state.paymentMethod = method;
+  }
+  function updateSummary() {
+    document.getElementById("summary-amount").textContent = `₹${state.amount.toLocaleString("en-IN")}`;
+    document.getElementById("summary-cause").textContent  = causeLabel(state.cause);
+  }
+  function causeLabel(c) {
+    const map = { general:UI_TEXT.cause_general, women:UI_TEXT.cause_women, trans:UI_TEXT.cause_trans, children:UI_TEXT.cause_children, kitchen:UI_TEXT.cause_kitchen };
+    return map[c] || UI_TEXT.cause_general;
+  }
+
+  // ── Razorpay Payment Flow ──────────────────────────────────────────────────
+  async function initiatePayment() {
+    const btn     = document.getElementById("payBtn");
+    const btnText = document.getElementById("payBtnText");
+    const spinner = document.getElementById("paySpinner");
+
+    btn.disabled = true;
+    btnText.classList.add("hidden");
+    spinner.classList.remove("hidden");
+
+    try {
+      // 1. Create order on backend
+      const orderRes = await fetch("/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: state.amount,
+          name:   state.anonymous ? UI_TEXT.anonymous_name : state.name,
+          email:  state.email,
+          phone:  state.phone,
+          cause:  state.cause,
+        })
+      });
+      const order = await orderRes.json();
+      if (order.error) throw new Error(order.error);
+
+      // 2. Open Razorpay checkout
+      const options = {
+        key:         RAZORPAY_KEY,
+        amount:      order.amount,
+        currency:    "INR",
+        name:        NGO_NAME,
+        description: `${UI_TEXT.donate_towards}: ${causeLabel(state.cause)}`,
+        order_id:    order.order_id,
+        prefill: {
+          name:    state.anonymous ? "" : state.name,
+          email:   state.email,
+          contact: "+91" + state.phone,
+        },
+        theme: { color: "#1a7a4a" },
+        modal: {
+          ondismiss: () => {
+            btn.disabled = false;
+            btnText.classList.remove("hidden");
+            spinner.classList.add("hidden");
+          }
+        },
+        handler: async function(response) {
+          await verifyPayment(response, order.amount);
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on("payment.failed", (resp) => {
+        alert(UI_TEXT.payment_failed + " " + resp.error.description);
+        btn.disabled = false;
+        btnText.classList.remove("hidden");
+        spinner.classList.add("hidden");
+      });
+      rzp.open();
+
+    } catch (err) {
+      alert(UI_TEXT.payment_start_failed + " " + err.message);
+      btn.disabled = false;
+      btnText.classList.remove("hidden");
+      spinner.classList.add("hidden");
+    }
+  }
+
+  async function verifyPayment(response, amountPaise) {
+    try {
+      const res = await fetch("/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id:   response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature:  response.razorpay_signature,
+          amount:              amountPaise,
+          name:                state.name,
+          phone:               state.phone,
+          email:               state.email,
+          cause:               state.cause,
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById("success-amount").textContent = state.amount.toLocaleString("en-IN");
+        document.getElementById("success-pid").textContent    = response.razorpay_payment_id;
+        const smsEl = document.getElementById("success-sms");
+        if (data.sms_sent) {
+          smsEl.textContent = UI_TEXT.sms_success;
+        } else {
+          smsEl.textContent = UI_TEXT.sms_unavailable;
+        }
+        showStep("success");
+      } else {
+        alert(UI_TEXT.verify_failed + " " + response.razorpay_payment_id);
+      }
+    } catch (err) {
+      alert(UI_TEXT.verify_error + " " + response.razorpay_payment_id);
+    }
+  }
+
+  function shareWhatsApp() {
+    const pid = document.getElementById("success-pid").textContent;
+    const msg = encodeURIComponent(`${UI_TEXT.share_intro.replace("₹", `₹${state.amount}`)} ${UI_TEXT.share_invite} ${UI_TEXT.share_donate_at} ${window.location.origin}/donate?lang={{ current_lang }}`);
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+  }
+
+  // ── Accessibility: font size control (local to this page) ────────────────
+  (function() {
+    const steps = ["normal", "large", "xlarge"];
+    let idx = steps.indexOf(localStorage.getItem("virutcham_font_size") || "normal");
+    if (idx < 0) idx = 0;
+    function apply() {
+      document.body.style.fontSize = idx === 0 ? "" : idx === 1 ? "18px" : "20px";
+    }
+    apply();
+    window.changeFontSize = function(dir) {
+      idx = Math.min(2, Math.max(0, idx + dir));
+      localStorage.setItem("virutcham_font_size", steps[idx]);
+      apply();
+    };
+  })();
+</script>
+</body>
+</html>

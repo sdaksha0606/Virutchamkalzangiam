@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Panel — Virutcham NGO</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<link id="font-link" rel="stylesheet" href=""/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f0f4f2;color:#0d1f16;display:flex;height:100vh;overflow:hidden}
+.sidebar{width:230px;flex-shrink:0;background:linear-gradient(180deg,#0d3d20,#103a5e);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+.sb-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+.sb-logo .em{font-size:1.6rem}
+.sb-logo h2{font-size:.88rem;font-weight:700;color:#fff;line-height:1.3}
+.sb-logo p{font-size:.65rem;color:rgba(255,255,255,.45);margin-top:1px}
+nav{padding:12px 0;flex:1}
+.nav-sec{padding:10px 16px 4px;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 16px;background:none;border:none;color:rgba(255,255,255,.7);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s;text-align:left;border-left:3px solid transparent}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#4dbb6e}
+.nav-icon{font-size:.9rem;width:18px;text-align:center}
+.sb-bottom{padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:8px}
+.btn-site{display:block;text-align:center;background:rgba(255,255,255,.12);color:#fff;padding:8px;border-radius:8px;font-size:.78rem;font-weight:600;text-decoration:none;transition:all .2s}
+.btn-site:hover{background:rgba(255,255,255,.22)}
+.btn-logout{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);font-size:.78rem;text-decoration:none;transition:color .2s;justify-content:center}
+.btn-logout:hover{color:#fff}
+.editor-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;padding:12px 20px;border-bottom:2px solid #e8f7ee;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
+.topbar-left h1{font-size:1rem;font-weight:700;color:#0d3d20}
+.topbar-left p{font-size:.75rem;color:#6b8377;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.btn-save{background:linear-gradient(135deg,#1e8f45,#0d3d20);color:#fff;border:none;padding:9px 22px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,122,60,.4)}
+.btn-save:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.preview-toggle{background:#e8f7ee;border:none;padding:9px 16px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;color:#1a7a3c;cursor:pointer;transition:all .2s}
+.preview-toggle:hover{background:#d0f0dd}
+.preview-toggle.on{background:#1a7a3c;color:#fff}
+.split{flex:1;display:flex;overflow:hidden}
+.controls{width:440px;flex-shrink:0;overflow-y:auto;background:#f8fdf9;border-right:2px solid #e8f7ee}
+.preview-pane{flex:1;overflow:hidden;background:#e0e8e3;display:flex;flex-direction:column}
+.preview-pane.hidden{display:none}
+.preview-bar{background:#1a1a2e;padding:8px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.preview-bar span{font-size:.72rem;color:rgba(255,255,255,.5);font-family:monospace}
+.preview-url{flex:1;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.8);font-size:.75rem;padding:5px 12px;border-radius:6px;font-family:monospace}
+.preview-dots{display:flex;gap:5px}
+.preview-dots span{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.preview-iframe{flex:1;border:none;background:#fff}
+.section-panel{display:none}
+.section-panel.active{display:block}
+.sec-header{padding:16px 20px 12px;background:#fff;border-bottom:2px solid #e8f7ee;position:sticky;top:0;z-index:10}
+.sec-header h2{font-size:.95rem;font-weight:700;color:#0d3d20;display:flex;align-items:center;gap:8px}
+.sec-header p{font-size:.75rem;color:#6b8377;margin-top:3px}
+.fields{padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.72rem;font-weight:700;color:#3a5244;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.hint{font-size:.65rem;font-weight:400;color:#6b8377;text-transform:none;letter-spacing:0}
+.field input,.field textarea,.field select{padding:10px 12px;border:2px solid #d8e4dc;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:#0d1f16;background:#fff;transition:all .2s;width:100%}
+.field textarea{resize:vertical;min-height:72px}
+.field input:focus,.field textarea:focus{outline:none;border-color:#22a44e;box-shadow:0 0 0 3px rgba(34,164,78,.1)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.img-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 20px}
+.img-card{border:2px solid #d8e4dc;border-radius:10px;overflow:hidden;background:#fff;transition:border-color .2s}
+.img-card:hover{border-color:#4dbb6e}
+.img-thumb{width:100%;height:110px;object-fit:cover;background:linear-gradient(135deg,#e8f7ee,#dff0fa);display:block}
+.img-thumb-ph{width:100%;height:110px;background:linear-gradient(135deg,#e8f7ee,#dff0fa);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#b0c8b8}
+.img-info{padding:10px 12px}
+.img-lbl{font-size:.72rem;font-weight:700;color:#3a5244;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.img-rec{font-size:.65rem;color:#6b8377;margin-bottom:8px}
+.img-btn{width:100%;padding:7px;background:#e8f7ee;border:none;border-radius:6px;color:#1a7a3c;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s}
+.img-btn:hover{background:#1a7a3c;color:#fff}
+.img-status{font-size:.72rem;color:#6b8377;margin-top:5px;min-height:14px;text-align:center}
+.img-input{display:none}
+.font-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
+.font-card{border:2px solid #d8e4dc;border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;background:#fff;text-align:center}
+.font-card:hover{border-color:#4dbb6e;background:#f2fbf5}
+.font-card.active{border-color:#1a7a3c;background:#e8f7ee;box-shadow:0 0 0 3px rgba(26,122,60,.12)}
+.font-name{font-size:.72rem;font-weight:700;color:#3a5244;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.font-preview{font-size:1.1rem;color:#0d3d20;line-height:1.3}
+.font-sub{font-size:.7rem;color:#6b8377;margin-top:4px}
+.color-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
+.color-card{background:#fff;border:2px solid #d8e4dc;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.color-label{font-size:.72rem;font-weight:700;color:#3a5244;text-transform:uppercase;letter-spacing:.06em}
+input[type="color"]{width:100%;height:36px;border:2px solid #d8e4dc;border-radius:8px;cursor:pointer;padding:2px;background:#fff}
+.divider{height:1px;background:#e8f7ee;margin:4px 20px}
+.subsec{padding:12px 20px 4px;font-size:.8rem;font-weight:700;color:#1a7a3c}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:.88rem;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.15);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:9999;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:#0d3d20;color:#fff}
+.toast.error{background:#c53030;color:#fff}
+.toast.info{background:#103a5e;color:#fff}
+.theme-btns{display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 16px}
+.lang-picker{display:flex;flex-direction:column;gap:3px;padding:4px 16px 8px}
+.lang-pill{padding:6px 12px;border-radius:8px;font-size:.78rem;font-weight:500;color:rgba(255,255,255,.65);text-decoration:none;transition:all .18s;background:rgba(255,255,255,.05)}
+.lang-pill:hover{background:rgba(255,255,255,.12);color:#fff}
+.lang-pill.active{background:rgba(255,255,255,.18);color:#fff;font-weight:700;border-left:3px solid #4dbb6e;padding-left:9px}
+.access-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px;background:#fff;border:2px solid #d8e4dc;border-radius:10px}
+.access-toggle-label{font-size:.85rem;font-weight:600;color:#0d3d20}
+.access-toggle-desc{font-size:.74rem;color:#6b8377;margin-top:2px}
+.switch{position:relative;width:46px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#d8e4dc;border-radius:100px;transition:.2s}
+.switch-slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked + .switch-slider{background:#1a7a3c}
+.switch input:checked + .switch-slider:before{transform:translateX(20px)}
+.lang-banner{background:#e8f7ee;border:2px solid #1a7a3c;border-radius:10px;padding:12px 16px;margin:0 20px 16px;font-size:.82rem;color:#0d3d20;display:flex;align-items:center;gap:8px}
+.theme-btn{padding:7px 14px;border-radius:100px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="em">🌿</div>
+    <div><h2>Virutcham Admin</h2><p>Website Editor</p></div>
+  </div>
+  <nav>
+    <div class="nav-sec">Main</div>
+    <button class="nav-btn active" data-sec="general"><span class="nav-icon">✏️</span>Content Editor</button>
+    <a href="/admin/donations" class="nav-btn"><span class="nav-icon">💰</span>Donations</a>
+
+    <div class="nav-sec">Language</div>
+    <div class="lang-picker">
+      {% for code, label in languages.items() %}
+        <a href="/admin?lang={{ code }}" class="lang-pill {% if code == edit_lang %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="nav-sec">Text Content</div>
+    <button class="nav-btn" data-sec="hero"><span class="nav-icon">✨</span>Hero Section</button>
+    <button class="nav-btn" data-sec="about"><span class="nav-icon">🌿</span>About Us</button>
+    <button class="nav-btn" data-sec="women"><span class="nav-icon">👩</span>Women Cause</button>
+    <button class="nav-btn" data-sec="trans"><span class="nav-icon">🏳️‍⚧️</span>Trans Cause</button>
+    <button class="nav-btn" data-sec="children"><span class="nav-icon">📚</span>Children Cause</button>
+    <button class="nav-btn" data-sec="stats"><span class="nav-icon">📊</span>Impact Numbers</button>
+    <button class="nav-btn" data-sec="room"><span class="nav-icon">🏡</span>Room &amp; CTA</button>
+    <button class="nav-btn" data-sec="contact"><span class="nav-icon">📞</span>Contact &amp; Social</button>
+    <div class="nav-sec">Images</div>
+    <button class="nav-btn" data-sec="img-hero"><span class="nav-icon">🌅</span>Hero &amp; About</button>
+    <button class="nav-btn" data-sec="img-causes"><span class="nav-icon">📷</span>Cause Photos</button>
+    <button class="nav-btn" data-sec="img-gallery"><span class="nav-icon">🖼️</span>Gallery</button>
+    <div class="nav-sec">Design &amp; Accessibility</div>
+    <button class="nav-btn" data-sec="fonts"><span class="nav-icon">🔤</span>Fonts</button>
+    <button class="nav-btn" data-sec="colors"><span class="nav-icon">🎨</span>Colors</button>
+    <button class="nav-btn" data-sec="access"><span class="nav-icon">♿</span>Accessibility</button>
+  </nav>
+  <div class="sb-bottom">
+    <a href="/" target="_blank" class="btn-site">🌐 View Live Website</a>
+    <a href="{{ url_for('admin_change_password') }}" class="btn-site">🔑 Change Password</a>
+    <a href="/admin/logout" class="btn-logout">⬅ Logout</a>
+  </div>
+</aside>
+
+<div class="editor-area">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="section-title">General Info</h1>
+      <p id="section-desc">Edit NGO name, contact details and taglines</p>
+    </div>
+    <div class="topbar-right">
+      <button class="preview-toggle on" id="previewToggle" onclick="togglePreview()">👁 Preview On</button>
+      <button class="btn-save" id="saveBtn" onclick="saveAll()">💾 Save Changes</button>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="controls" id="controls">
+
+      <!-- GENERAL -->
+      <div class="section-panel active" id="sec-general">
+        <div class="sec-header"><h2>🏠 General NGO Information</h2><p>Changes update the entire website header, footer and contact section</p></div>
+        <div class="lang-banner">
+          🌐 You are editing text in: <strong>{{ languages[edit_lang] }}</strong> — use the Language menu on the left to switch and translate other languages.
+        </div>
+        <input type="hidden" name="_edit_lang" id="edit-lang-input" value="{{ edit_lang }}"/>
+        <div class="fields">
+          <div class="field"><label>NGO Full Name</label><input name="ngo_name" value="{{ c.ngo_name }}" oninput="schedulePreview()"/></div>
+          <div class="field-row">
+            <div class="field"><label>Short Name</label><input name="ngo_short" value="{{ c.ngo_short }}" oninput="schedulePreview()"/></div>
+            <div class="field"><label>Tamil Name</label><input name="ngo_tamil" value="{{ c.ngo_tamil }}" oninput="schedulePreview()"/></div>
+          </div>
+          <div class="field"><label>Website Tagline <span class="hint">hero &amp; footer</span></label><input name="ngo_tagline" value="{{ c.ngo_tagline }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Footer Tagline</label><input name="footer_tagline" value="{{ c.footer_tagline }}" oninput="schedulePreview()"/></div>
+          <div class="divider"></div>
+          <div class="field-row">
+            <div class="field"><label>Email</label><input name="ngo_email" type="email" value="{{ c.ngo_email }}"/></div>
+            <div class="field"><label>Phone</label><input name="ngo_phone" value="{{ c.ngo_phone }}"/></div>
+          </div>
+          <div class="field"><label>Address</label><input name="ngo_address" value="{{ c.ngo_address }}"/></div>
+        </div>
+      </div>
+
+      <!-- HERO -->
+      <div class="section-panel" id="sec-hero">
+        <div class="sec-header"><h2>✨ Hero Section</h2><p>Big text shown over the slideshow on the homepage</p></div>
+        <div class="fields">
+          <div class="field"><label>Small Tag Badge</label><input name="hero_tag" value="{{ c.hero_tag }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Line 1 — Tamil <span class="hint">green colour</span></label><input name="hero_line1" value="{{ c.hero_line1 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Line 2 — Main Heading <span class="hint">white colour</span></label><input name="hero_line2" value="{{ c.hero_line2 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Line 3 — Sub Heading <span class="hint">blue colour</span></label><input name="hero_line3" value="{{ c.hero_line3 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Description Paragraph</label><textarea name="hero_desc" oninput="schedulePreview()">{{ c.hero_desc }}</textarea></div>
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <div class="section-panel" id="sec-about">
+        <div class="sec-header"><h2>🌿 About Us Section</h2><p>The description section below the hero on homepage</p></div>
+        <div class="fields">
+          <div class="field"><label>Section Title</label><input name="about_title" value="{{ c.about_title }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Paragraph 1</label><textarea name="about_text1" oninput="schedulePreview()">{{ c.about_text1 }}</textarea></div>
+          <div class="field"><label>Paragraph 2</label><textarea name="about_text2" oninput="schedulePreview()">{{ c.about_text2 }}</textarea></div>
+        </div>
+      </div>
+
+      <!-- WOMEN -->
+      <div class="section-panel" id="sec-women">
+        <div class="sec-header"><h2>👩 Women Empowerment Card</h2><p>Text on the Women cause card</p></div>
+        <div class="fields">
+          <div class="field"><label>Card Title</label><input name="women_title" value="{{ c.women_title }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Description</label><textarea name="women_desc" oninput="schedulePreview()">{{ c.women_desc }}</textarea></div>
+          <div class="subsec">✓ Bullet Points</div>
+          <div class="field"><label>Point 1</label><input name="women_point1" value="{{ c.women_point1 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 2</label><input name="women_point2" value="{{ c.women_point2 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 3</label><input name="women_point3" value="{{ c.women_point3 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 4</label><input name="women_point4" value="{{ c.women_point4 }}" oninput="schedulePreview()"/></div>
+        </div>
+      </div>
+
+      <!-- TRANS -->
+      <div class="section-panel" id="sec-trans">
+        <div class="sec-header"><h2>🏳️‍⚧️ Transgender Empowerment Card</h2><p>Text on the Transgender cause card</p></div>
+        <div class="fields">
+          <div class="field"><label>Card Title</label><input name="trans_title" value="{{ c.trans_title }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Description</label><textarea name="trans_desc" oninput="schedulePreview()">{{ c.trans_desc }}</textarea></div>
+          <div class="subsec">✓ Bullet Points</div>
+          <div class="field"><label>Point 1</label><input name="trans_point1" value="{{ c.trans_point1 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 2</label><input name="trans_point2" value="{{ c.trans_point2 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 3</label><input name="trans_point3" value="{{ c.trans_point3 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 4</label><input name="trans_point4" value="{{ c.trans_point4 }}" oninput="schedulePreview()"/></div>
+        </div>
+      </div>
+
+      <!-- CHILDREN -->
+      <div class="section-panel" id="sec-children">
+        <div class="sec-header"><h2>📚 Children's Schooling Card</h2><p>Text on the Children cause card</p></div>
+        <div class="fields">
+          <div class="field"><label>Card Title</label><input name="children_title" value="{{ c.children_title }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Description</label><textarea name="children_desc" oninput="schedulePreview()">{{ c.children_desc }}</textarea></div>
+          <div class="subsec">✓ Bullet Points</div>
+          <div class="field"><label>Point 1</label><input name="children_point1" value="{{ c.children_point1 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 2</label><input name="children_point2" value="{{ c.children_point2 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 3</label><input name="children_point3" value="{{ c.children_point3 }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Point 4</label><input name="children_point4" value="{{ c.children_point4 }}" oninput="schedulePreview()"/></div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="section-panel" id="sec-stats">
+        <div class="sec-header"><h2>📊 Impact Numbers</h2><p>Big numbers shown in the Impact section</p></div>
+        <div class="fields">
+          <div class="field-row">
+            <div class="field"><label>Years of Service</label><input name="stat_years" type="number" value="{{ c.stat_years }}" oninput="schedulePreview()"/></div>
+            <div class="field"><label>Women Supported</label><input name="stat_women" type="number" value="{{ c.stat_women }}" oninput="schedulePreview()"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Transgender Lives</label><input name="stat_trans" type="number" value="{{ c.stat_trans }}" oninput="schedulePreview()"/></div>
+            <div class="field"><label>Children Educated</label><input name="stat_children" type="number" value="{{ c.stat_children }}" oninput="schedulePreview()"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Meals Served</label><input name="stat_meals" type="number" value="{{ c.stat_meals }}" oninput="schedulePreview()"/></div>
+            <div class="field"><label>Villages Reached</label><input name="stat_villages" type="number" value="{{ c.stat_villages }}" oninput="schedulePreview()"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROOM -->
+      <div class="section-panel" id="sec-room">
+        <div class="sec-header"><h2>🏡 Room Section &amp; Donate Banner</h2><p>Full-width dark section and the donate call-to-action</p></div>
+        <div class="fields">
+          <div class="field"><label>Room Section Title</label><input name="room_title" value="{{ c.room_title }}" oninput="schedulePreview()"/></div>
+          <div class="field"><label>Room Description</label><textarea name="room_desc" oninput="schedulePreview()">{{ c.room_desc }}</textarea></div>
+          <div class="divider"></div>
+          <div class="field"><label>Donate Banner Heading</label><textarea name="cta_title" oninput="schedulePreview()">{{ c.cta_title }}</textarea></div>
+          <div class="field"><label>Donate Banner Sub Text</label><input name="cta_desc" value="{{ c.cta_desc }}" oninput="schedulePreview()"/></div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="section-panel" id="sec-contact">
+        <div class="sec-header"><h2>📞 Contact &amp; Social Media</h2><p>Links shown in contact section and footer</p></div>
+        <div class="fields">
+          <div class="field"><label>Facebook URL</label><input name="social_facebook" value="{{ c.social_facebook }}" placeholder="https://facebook.com/yourpage"/></div>
+          <div class="field"><label>Instagram URL</label><input name="social_instagram" value="{{ c.social_instagram }}" placeholder="https://instagram.com/yourpage"/></div>
+          <div class="field"><label>YouTube URL</label><input name="social_youtube" value="{{ c.social_youtube }}" placeholder="https://youtube.com/channel"/></div>
+          <div class="field"><label>WhatsApp Link</label><input name="social_whatsapp" value="{{ c.social_whatsapp }}" placeholder="https://wa.me/91XXXXXXXXXX"/></div>
+        </div>
+      </div>
+
+      <!-- IMG HERO -->
+      <div class="section-panel" id="sec-img-hero">
+        <div class="sec-header"><h2>🌅 Hero &amp; About Images</h2><p>Click "Change Photo" — image updates on the website instantly after upload</p></div>
+        <div class="img-grid">
+          {% for key,label,src,rec in [('img_hero1','Hero Slide 1',c.img_hero1,'1920x1080'),('img_hero2','Hero Slide 2',c.img_hero2,'1920x1080'),('img_hero3','Hero Slide 3',c.img_hero3,'1920x1080'),('img_about','About Photo',c.img_about,'800x1000'),('img_donate_side','Donate Sidebar',c.img_donate_side,'800x450')] %}
+          <div class="img-card">
+            <img class="img-thumb" id="ithumb-{{key}}" src="/static/images/{{src}}" alt="{{label}}" onerror="this.style.display='none';document.getElementById('iph-{{key}}').style.display='flex'"/>
+            <div class="img-thumb-ph" id="iph-{{key}}" style="display:none">📷</div>
+            <div class="img-info">
+              <div class="img-lbl">{{label}}</div>
+              <div class="img-rec">{{rec}}px</div>
+              <button class="img-btn" onclick="document.getElementById('ifile-{{key}}').click()">📤 Change Photo</button>
+              <input class="img-input" id="ifile-{{key}}" type="file" accept="image/*" onchange="uploadImg('{{key}}',this)"/>
+              <div class="img-status" id="ist-{{key}}"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- IMG CAUSES -->
+      <div class="section-panel" id="sec-img-causes">
+        <div class="sec-header"><h2>📷 Cause &amp; Room Photos</h2><p>Photos on the Women, Transgender, Children cards and room background</p></div>
+        <div class="img-grid">
+          {% for key,label,src,rec in [('img_women','Women',c.img_women,'800x450'),('img_trans','Transgender',c.img_trans,'800x450'),('img_children','Children',c.img_children,'800x450'),('img_room','Room Bg',c.img_room,'1920x1080')] %}
+          <div class="img-card">
+            <img class="img-thumb" id="ithumb-{{key}}" src="/static/images/{{src}}" alt="{{label}}" onerror="this.style.display='none';document.getElementById('iph-{{key}}').style.display='flex'"/>
+            <div class="img-thumb-ph" id="iph-{{key}}" style="display:none">📷</div>
+            <div class="img-info">
+              <div class="img-lbl">{{label}}</div>
+              <div class="img-rec">{{rec}}px</div>
+              <button class="img-btn" onclick="document.getElementById('ifile-{{key}}').click()">📤 Change Photo</button>
+              <input class="img-input" id="ifile-{{key}}" type="file" accept="image/*" onchange="uploadImg('{{key}}',this)"/>
+              <div class="img-status" id="ist-{{key}}"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- IMG GALLERY -->
+      <div class="section-panel" id="sec-img-gallery">
+        <div class="sec-header"><h2>🖼️ Gallery Photos</h2><p>6 photos shown in the Gallery grid. Recommended: 600x450px</p></div>
+        <div class="img-grid">
+          {% for i in range(1,7) %}{% set key='img_g'~i %}{% set src=c['img_g'~i] %}
+          <div class="img-card">
+            <img class="img-thumb" id="ithumb-{{key}}" src="/static/images/{{src}}" alt="Gallery {{i}}" onerror="this.style.display='none';document.getElementById('iph-{{key}}').style.display='flex'"/>
+            <div class="img-thumb-ph" id="iph-{{key}}" style="display:none">📷</div>
+            <div class="img-info">
+              <div class="img-lbl">Gallery Photo {{i}}</div>
+              <div class="img-rec">600x450px</div>
+              <button class="img-btn" onclick="document.getElementById('ifile-{{key}}').click()">📤 Change Photo</button>
+              <input class="img-input" id="ifile-{{key}}" type="file" accept="image/*" onchange="uploadImg('{{key}}',this)"/>
+              <div class="img-status" id="ist-{{key}}"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- FONTS -->
+      <div class="section-panel" id="sec-fonts">
+        <div class="sec-header"><h2>🔤 Website Fonts</h2><p>Click a font style — then click Save Changes to apply to the live website</p></div>
+        <div class="font-grid">
+          <div class="font-card active" id="font-default" onclick="applyFont('default')">
+            <div class="font-name">Default</div>
+            <div class="font-preview" style="font-family:'Playfair Display',serif">Virutcham</div>
+            <div class="font-sub">DM Sans + Playfair</div>
+          </div>
+          <div class="font-card" id="font-inter" onclick="applyFont('inter')">
+            <div class="font-name">Professional</div>
+            <div class="font-preview" style="font-family:'Georgia',serif">Virutcham</div>
+            <div class="font-sub">Inter + Merriweather</div>
+          </div>
+          <div class="font-card" id="font-poppins" onclick="applyFont('poppins')">
+            <div class="font-name">Modern</div>
+            <div class="font-preview" style="font-family:'Georgia',serif;font-style:italic">Virutcham</div>
+            <div class="font-sub">Poppins + Cormorant</div>
+          </div>
+          <div class="font-card" id="font-noto" onclick="applyFont('noto')">
+            <div class="font-name">Tamil Friendly</div>
+            <div class="font-preview" style="font-family:'serif'">விருட்சம்</div>
+            <div class="font-sub">Noto Sans + Noto Serif</div>
+          </div>
+          <div class="font-card" id="font-lato" onclick="applyFont('lato')">
+            <div class="font-name">Classic</div>
+            <div class="font-preview" style="font-family:'Georgia',serif">Virutcham</div>
+            <div class="font-sub">Lato + Libre Baskerville</div>
+          </div>
+          <div class="font-card" id="font-roboto" onclick="applyFont('roboto')">
+            <div class="font-name">Clean</div>
+            <div class="font-preview" style="font-family:'serif'">Virutcham</div>
+            <div class="font-sub">Roboto + Roboto Slab</div>
+          </div>
+        </div>
+        <input type="hidden" name="_font_id" id="font-input" value="{{ c._font_id|default('default') }}"/>
+      </div>
+
+      <!-- COLORS -->
+      <div class="section-panel" id="sec-colors">
+        <div class="sec-header"><h2>🎨 Website Colors</h2><p>Pick colors then click Save Changes — applies to the live website</p></div>
+        <div class="color-grid">
+          <div class="color-card">
+            <div class="color-label">Primary Green</div>
+            <input type="color" name="_color_green" id="color-green" value="{{ c._color_green|default('#1a7a3c') }}"/>
+            <div style="font-size:.7rem;color:#6b8377">Buttons &amp; links</div>
+          </div>
+          <div class="color-card">
+            <div class="color-label">Dark Green</div>
+            <input type="color" name="_color_dark" id="color-dark" value="{{ c._color_dark|default('#0d3d20') }}"/>
+            <div style="font-size:.7rem;color:#6b8377">Navbar &amp; footer</div>
+          </div>
+          <div class="color-card">
+            <div class="color-label">Primary Blue</div>
+            <input type="color" name="_color_blue" id="color-blue" value="{{ c._color_blue|default('#1a5276') }}"/>
+            <div style="font-size:.7rem;color:#6b8377">Accents &amp; hero</div>
+          </div>
+          <div class="color-card">
+            <div class="color-label">Page Background</div>
+            <input type="color" name="_color_bg" id="color-bg" value="{{ c._color_bg|default('#f8fdf9') }}"/>
+            <div style="font-size:.7rem;color:#6b8377">Site background</div>
+          </div>
+        </div>
+        <div class="subsec">Quick Themes</div>
+        <div class="theme-btns">
+          <button class="theme-btn" style="border:2px solid #1a7a3c;background:#e8f7ee;color:#1a7a3c" onclick="applyTheme('green')">🌿 Green</button>
+          <button class="theme-btn" style="border:2px solid #1a5276;background:#dff0fa;color:#1a5276" onclick="applyTheme('blue')">💙 Blue</button>
+          <button class="theme-btn" style="border:2px solid #6b3fa0;background:#f3e8ff;color:#6b3fa0" onclick="applyTheme('purple')">💜 Purple</button>
+          <button class="theme-btn" style="border:2px solid #b35c00;background:#fff3e0;color:#b35c00" onclick="applyTheme('orange')">🧡 Orange</button>
+        </div>
+      </div>
+
+      <!-- ACCESSIBILITY -->
+      <div class="section-panel" id="sec-access">
+        <div class="sec-header"><h2>♿ Accessibility Settings</h2><p>Help visitors with low vision, motion sensitivity or screen readers use the site comfortably</p></div>
+        <div class="fields">
+          <div class="field">
+            <label>Default Text Size <span class="hint">applies site-wide unless visitor changes it</span></label>
+            <select name="_font_size" id="font-size-select">
+              <option value="normal" {% if c._font_size == 'normal' or not c._font_size %}selected{% endif %}>Normal</option>
+              <option value="large"  {% if c._font_size == 'large' %}selected{% endif %}>Large</option>
+              <option value="xlarge" {% if c._font_size == 'xlarge' %}selected{% endif %}>Extra Large</option>
+            </select>
+          </div>
+
+          <div class="access-toggle-row">
+            <div>
+              <div class="access-toggle-label">High Contrast Mode</div>
+              <div class="access-toggle-desc">Black text on white background for low-vision visitors</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="contrast-toggle" {% if c._high_contrast == 'on' %}checked{% endif %}/>
+              <span class="switch-slider"></span>
+            </label>
+            <input type="hidden" name="_high_contrast" id="contrast-hidden" value="{{ c._high_contrast|default('off') }}"/>
+          </div>
+
+          <div class="access-toggle-row">
+            <div>
+              <div class="access-toggle-label">Reduce Motion</div>
+              <div class="access-toggle-desc">Turns off animations and transitions site-wide</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="motion-toggle" {% if c._reduce_motion == 'on' %}checked{% endif %}/>
+              <span class="switch-slider"></span>
+            </label>
+            <input type="hidden" name="_reduce_motion" id="motion-hidden" value="{{ c._reduce_motion|default('off') }}"/>
+          </div>
+
+          <div class="field">
+            <label>Default Website Language <span class="hint">for first-time visitors</span></label>
+            <select name="_default_lang">
+              {% for code, label in languages.items() %}
+                <option value="{{ code }}" {% if c._default_lang == code %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end controls -->
+
+    <!-- LIVE PREVIEW -->
+    <div class="preview-pane" id="previewPane">
+      <div class="preview-bar">
+        <div class="preview-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+        <input class="preview-url" readonly value="http://localhost:5000"/>
+        <span>Live Preview</span>
+      </div>
+      <iframe class="preview-iframe" id="previewFrame" src="/?lang={{ edit_lang }}" title="Live preview"></iframe>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Navigation
+const EDIT_LANG = "{{ edit_lang }}";
+function previewUrl(){ return '/?lang='+EDIT_LANG+'&t='+Date.now(); }
+const SEC_META={general:['General Info','Edit NGO name, contact details and taglines'],hero:['Hero Section','Big text shown over the slideshow'],about:['About Us','Description section below the hero'],women:['Women Cause','Text on the Women empowerment card'],trans:['Transgender Cause','Text on the Transgender support card'],children:['Children Cause','Text on the Children education card'],stats:['Impact Numbers','Big numbers in the impact section'],room:['Room & CTA Section','Room background section and donate banner'],contact:['Contact & Social','Social media links and contact info'],'img-hero':['Hero & About Images','Upload hero slideshow and about photos'],'img-causes':['Cause Photos','Upload women, trans, children, room images'],'img-gallery':['Gallery Photos','Upload all 6 gallery images'],fonts:['Website Fonts','Change the font style of the whole website'],colors:['Website Colors','Customise the color theme'],access:['Accessibility Settings','Text size, contrast and motion settings for visitors']};
+
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const sec=btn.dataset.sec;
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sec-'+sec).classList.add('active');
+    if(SEC_META[sec]){
+      document.getElementById('section-title').textContent=SEC_META[sec][0];
+      document.getElementById('section-desc').textContent=SEC_META[sec][1];
+    }
+  });
+});
+
+// Preview toggle
+function togglePreview(){
+  const p=document.getElementById('previewPane'),b=document.getElementById('previewToggle');
+  const h=p.classList.toggle('hidden');
+  b.textContent=h?'👁 Preview Off':'👁 Preview On';
+  b.classList.toggle('on',!h);
+}
+
+// Debounced preview refresh
+let pt=null;
+function schedulePreview(){
+  clearTimeout(pt);
+  pt=setTimeout(()=>{
+    const f=document.getElementById('previewFrame');
+    if(f&&!document.getElementById('previewPane').classList.contains('hidden'))
+      f.src=previewUrl();
+  },1000);
+}
+
+// Save all
+async function saveAll(){
+  const btn=document.getElementById('saveBtn');
+  btn.textContent='⏳ Saving...';btn.disabled=true;
+
+  // Sync toggle switches into their hidden fields before saving
+  document.getElementById('contrast-hidden').value = document.getElementById('contrast-toggle').checked ? 'on' : 'off';
+  document.getElementById('motion-hidden').value    = document.getElementById('motion-toggle').checked ? 'on' : 'off';
+
+  const form=new FormData();
+  document.querySelectorAll('input[name],textarea[name],select[name]').forEach(el=>form.append(el.name,el.value));
+  try{
+    const res=await fetch('/admin/save-text',{method:'POST',body:form});
+    const data=await res.json();
+    if(data.success){
+      showToast('✅ All changes saved! Website updated.','success');
+      setTimeout(()=>{document.getElementById('previewFrame').src=previewUrl();},500);
+    }else showToast('⚠️ Save failed. Try again.','error');
+  }catch(e){showToast('⚠️ Network error.','error');}
+  btn.textContent='💾 Save Changes';btn.disabled=false;
+}
+
+// Image upload
+async function uploadImg(key,input){
+  const file=input.files[0];if(!file)return;
+  const status=document.getElementById('ist-'+key);
+  const thumb=document.getElementById('ithumb-'+key);
+  const ph=document.getElementById('iph-'+key);
+  // Show local preview immediately
+  const reader=new FileReader();
+  reader.onload=e=>{thumb.src=e.target.result;thumb.style.display='block';if(ph)ph.style.display='none';};
+  reader.readAsDataURL(file);
+  status.textContent='⏳ Uploading...';
+  const form=new FormData();form.append('image_key',key);form.append('image_file',file);
+  try{
+    const res=await fetch('/admin/upload-image',{method:'POST',body:form});
+    const data=await res.json();
+    if(data.success){
+      status.textContent='✅ Saved!';
+      showToast('📷 Image updated!','success');
+      setTimeout(()=>{document.getElementById('previewFrame').src=previewUrl();status.textContent='';},1500);
+    }else{status.textContent='❌ '+data.error;showToast('⚠️ '+data.error,'error');}
+  }catch(e){status.textContent='❌ Failed';showToast('⚠️ Upload failed','error');}
+  input.value='';
+}
+
+// Font picker
+let currentFont='{{ c._font_id|default("default") }}';
+const FONTS={default:'DM+Sans:wght@400;600&family=Playfair+Display:wght@700',inter:'Inter:wght@400;600&family=Merriweather:wght@700',poppins:'Poppins:wght@400;600&family=Cormorant+Garamond:wght@700',noto:'Noto+Sans:wght@400;600&family=Noto+Serif:wght@700',lato:'Lato:wght@400;700&family=Libre+Baskerville:wght@700',roboto:'Roboto:wght@400;500;700&family=Roboto+Slab:wght@700'};
+function applyFont(id){
+  currentFont=id;
+  document.getElementById('font-input').value=id;
+  document.getElementById('font-link').href='https://fonts.googleapis.com/css2?family='+FONTS[id]+'&display=swap';
+  document.querySelectorAll('.font-card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('font-'+id).classList.add('active');
+  showToast('🔤 Font selected! Click Save Changes to apply.','info');
+}
+
+// Color themes
+const THEMES={green:{g:'#1a7a3c',d:'#0d3d20',b:'#1a5276',bg:'#f8fdf9'},blue:{g:'#1a6098',d:'#0a2540',b:'#1a5276',bg:'#f0f8fd'},purple:{g:'#6b3fa0',d:'#3b1f6b',b:'#4a3580',bg:'#faf5ff'},orange:{g:'#b35c00',d:'#6b3500',b:'#1a5276',bg:'#fffbf5'}};
+function applyTheme(name){
+  const t=THEMES[name];
+  document.getElementById('color-green').value=t.g;
+  document.getElementById('color-dark').value=t.d;
+  document.getElementById('color-blue').value=t.b;
+  document.getElementById('color-bg').value=t.bg;
+  showToast('🎨 Theme selected! Click Save Changes to apply.','info');
+}
+
+// Toast
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type+' show';
+  setTimeout(()=>t.className='toast',3800);
+}
+
+// Ctrl+S shortcut
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveAll();}
+});
+
+// Set active font card on load
+document.addEventListener('DOMContentLoaded',()=>{
+  const f=document.getElementById('font-input').value||'default';
+  document.querySelectorAll('.font-card').forEach(c=>c.classList.remove('active'));
+  const fc=document.getElementById('font-'+f);
+  if(fc)fc.classList.add('active');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#163d2d"/>
+  <title>Office sign in | Virutcham</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-auth.css') }}"/>
+</head>
+<body>
+  <main class="auth-shell">
+    <aside class="brand-panel">
+      <a class="brand" href="/" aria-label="Virutcham public website">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span>Virutcham</span>
+      </a>
+      <div class="brand-copy">
+        <p class="eyebrow">OFFICE ACCESS</p>
+        <h1>Rooted in community.<br/>Rising together.</h1>
+        <p class="brand-note">Virutcham Magalir Munnetra Kalzangiam</p>
+      </div>
+      <a class="brand-home" href="/">Visit the public website <span aria-hidden="true">↗</span></a>
+    </aside>
+
+    <section class="form-panel" aria-labelledby="form-title">
+      <div class="form-content">
+        <p class="eyebrow form-eyebrow">STAFF PORTAL</p>
+        <h2 id="form-title">Sign in</h2>
+        <p class="form-intro">Use your office account to continue.</p>
+
+        {% if message %}<div class="notice" role="status">{{ message }}</div>{% endif %}
+        {% if error %}<div class="notice notice-error" role="alert">{{ error }}</div>{% endif %}
+
+        <form method="POST" class="auth-form">
+          <div class="field">
+            <label for="username">Office username</label>
+            <input id="username" type="text" name="username" required autocomplete="username" autofocus/>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password" required autocomplete="current-password"/>
+          </div>
+          <button class="primary-button" type="submit">Sign in to office</button>
+        </form>
+
+        <a class="text-link forgot-link" href="{{ url_for('admin_forgot_password') }}">Forgot password?</a>
+        <p class="public-note">Donors can browse and donate on the public website without signing in.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

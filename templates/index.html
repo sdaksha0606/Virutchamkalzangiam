@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ c.ngo_name }}</title>
+  <meta name="description" content="{{ ui.home_description }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}" />
+  <style>
+    :root{
+      --green-700: {{ c._color_green|default('#1a7a3c') }};
+      --green-900: {{ c._color_dark|default('#0d3d20') }};
+      --blue-700:  {{ c._color_blue|default('#1a5276') }};
+      --off-white: {{ c._color_bg|default('#f8fdf9') }};
+    }
+    {% if c._font_size == 'large' %}body{ font-size: 18px; }{% endif %}
+    {% if c._font_size == 'xlarge' %}body{ font-size: 20px; }{% endif %}
+    {% if c._high_contrast == 'on' %}
+      body{ background:#fff; color:#000; }
+      .section-sub, .grey-500, .stat-label, .impact-label{ color:#000 !important; }
+      a{ text-decoration: underline; }
+    {% endif %}
+    {% if c._reduce_motion == 'on' %}
+      *, *::before, *::after{ animation: none !important; transition: none !important; }
+    {% endif %}
+  </style>
+</head>
+<body>
+
+<!-- ═══ ACCESSIBILITY + LANGUAGE BAR ═══════════════════════════════════════ -->
+<div class="a11y-bar">
+  <div class="a11y-inner">
+    <div class="lang-switch">
+      {% for code, label in languages.items() %}
+        <a href="/?lang={{ code }}" class="lang-btn {% if code == current_lang %}active{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NAVBAR ═══════════════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <div class="logo-emblem">🌿</div>
+      <div class="logo-text">
+        <span class="logo-main">{{ c.ngo_short }}</span>
+        <span class="logo-sub">{{ c.ngo_tamil }} {{ ui.logo_sub }}</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="primary-nav">
+      <li><a href="#about">{{ ui.nav_about }}</a></li>
+      <li><a href="#causes">{{ ui.nav_causes }}</a></li>
+      <li><a href="#impact">{{ ui.nav_impact }}</a></li>
+      <li><a href="#gallery">{{ ui.nav_gallery }}</a></li>
+      <li><a href="#contact">{{ ui.nav_contact }}</a></li>
+      <li><a href="{{ url_for('donate', lang=current_lang) }}" class="btn-nav-donate">{{ ui.donate_now }}</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" type="button" aria-label="{{ ui.menu_label }}" aria-controls="primary-nav" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ══════════════════════════════════════════════════════════════ -->
+<section class="hero" id="home">
+  <div class="hero-slides">
+    <div class="slide active" style="background-image:url('/static/images/{{ c.img_hero1 }}')"></div>
+    <div class="slide"        style="background-image:url('/static/images/{{ c.img_hero2 }}')"></div>
+    <div class="slide"        style="background-image:url('/static/images/{{ c.img_hero3 }}')"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-tag">✦ {{ c.hero_tag }}</p>
+    <h1 class="hero-title">
+      <span class="line1">{{ c.hero_line1 }}</span>
+      <span class="line2">{{ c.hero_line2 }}</span>
+      <span class="line3">{{ c.hero_line3 }}</span>
+    </h1>
+    <p class="hero-desc">{{ c.hero_desc }}</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('donate', lang=current_lang) }}" class="btn-primary pulse">{{ ui.donate_now }}</a>
+      <a href="#causes" class="btn-ghost">{{ ui.our_causes }}</a>
+    </div>
+  </div>
+  <div class="slide-dots" id="slideDots">
+    <button class="dot active" onclick="goSlide(0)"></button>
+    <button class="dot" onclick="goSlide(1)"></button>
+    <button class="dot" onclick="goSlide(2)"></button>
+  </div>
+  <div class="scroll-cue"><span>{{ ui.scroll }}</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- ═══ TICKER ════════════════════════════════════════════════════════════ -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span>🌿 {{ ui.ticker_women }}</span><span>⟡</span>
+    <span>🏳️‍⚧️ {{ ui.ticker_trans }}</span><span>⟡</span>
+    <span>📚 {{ ui.ticker_children }}</span><span>⟡</span>
+    <span>🍳 {{ ui.ticker_kitchen }}</span><span>⟡</span>
+    <span>🏠 {{ ui.ticker_safe }}</span><span>⟡</span>
+    <span>💚 {{ ui.ticker_location }}</span><span>⟡</span>
+    <span>🌿 {{ ui.ticker_women }}</span><span>⟡</span>
+    <span>🏳️‍⚧️ {{ ui.ticker_trans }}</span><span>⟡</span>
+    <span>📚 {{ ui.ticker_children }}</span><span>⟡</span>
+    <span>🍳 {{ ui.ticker_kitchen }}</span><span>⟡</span>
+  </div>
+</div>
+
+<!-- ═══ ABOUT ══════════════════════════════════════════════════════════════ -->
+<section class="section about-section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text" data-reveal>
+        <span class="section-tag">{{ ui.about_tag }}</span>
+        <h2 class="section-title">{{ c.about_title }}</h2>
+        <p>{{ c.about_text1 }}</p>
+        <p>{{ c.about_text2 }}</p>
+        <div class="about-stats">
+          <div class="stat"><span class="stat-num" data-count="{{ c.stat_women }}">0</span><span class="stat-label">{{ ui.women_supported }}</span></div>
+          <div class="stat"><span class="stat-num" data-count="{{ c.stat_trans }}">0</span><span class="stat-label">{{ ui.trans_lives }}</span></div>
+          <div class="stat"><span class="stat-num" data-count="{{ c.stat_children }}">0</span><span class="stat-label">{{ ui.children_educated }}</span></div>
+        </div>
+      </div>
+      <div class="about-image" data-reveal>
+        <div class="img-frame">
+          <img src="/static/images/{{ c.img_about }}" alt="{{ ui.community_alt }}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.add('img-placeholder')" />
+          <div class="img-accent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CAUSES ════════════════════════════════════════════════════════════ -->
+<section class="section causes-section" id="causes">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <span class="section-tag">{{ ui.what_we_do }}</span>
+      <h2 class="section-title">{{ ui.pillars_title }}</h2>
+      <p class="section-sub">{{ ui.causes_intro }}</p>
+    </div>
+    <div class="causes-grid">
+
+      <!-- Women -->
+      <div class="cause-card women" data-reveal>
+        <div class="cause-img-wrap">
+          <img src="/static/images/{{ c.img_women }}" alt="{{ c.women_title }}" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" />
+          <div class="cause-badge">01</div>
+        </div>
+        <div class="cause-body">
+          <div class="cause-icon">👩</div>
+          <h3>{{ c.women_title }}</h3>
+          <p>{{ c.women_desc }}</p>
+          <ul class="cause-list">
+            <li>✓ {{ c.women_point1 }}</li>
+            <li>✓ {{ c.women_point2 }}</li>
+            <li>✓ {{ c.women_point3 }}</li>
+            <li>✓ {{ c.women_point4 }}</li>
+          </ul>
+          <a href="{{ url_for('donate', lang=current_lang) }}" class="cause-cta">{{ ui.support_women }}</a>
+        </div>
+      </div>
+
+      <!-- Transgender -->
+      <div class="cause-card trans" data-reveal>
+        <div class="cause-img-wrap">
+          <img src="/static/images/{{ c.img_trans }}" alt="{{ c.trans_title }}" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" />
+          <div class="cause-badge">02</div>
+        </div>
+        <div class="cause-body">
+          <div class="cause-icon">🏳️‍⚧️</div>
+          <h3>{{ c.trans_title }}</h3>
+          <p>{{ c.trans_desc }}</p>
+          <ul class="cause-list">
+            <li>✓ {{ c.trans_point1 }}</li>
+            <li>✓ {{ c.trans_point2 }}</li>
+            <li>✓ {{ c.trans_point3 }}</li>
+            <li>✓ {{ c.trans_point4 }}</li>
+          </ul>
+          <a href="{{ url_for('donate', lang=current_lang) }}" class="cause-cta">{{ ui.support_trans }}</a>
+        </div>
+      </div>
+
+      <!-- Children -->
+      <div class="cause-card children" data-reveal>
+        <div class="cause-img-wrap">
+          <img src="/static/images/{{ c.img_children }}" alt="{{ c.children_title }}" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" />
+          <div class="cause-badge">03</div>
+        </div>
+        <div class="cause-body">
+          <div class="cause-icon">📚</div>
+          <h3>{{ c.children_title }}</h3>
+          <p>{{ c.children_desc }}</p>
+          <ul class="cause-list">
+            <li>✓ {{ c.children_point1 }}</li>
+            <li>✓ {{ c.children_point2 }}</li>
+            <li>✓ {{ c.children_point3 }}</li>
+            <li>✓ {{ c.children_point4 }}</li>
+          </ul>
+          <a href="{{ url_for('donate', lang=current_lang) }}" class="cause-cta">{{ ui.educate_child }}</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THE ROOM ══════════════════════════════════════════════════════════ -->
+<section class="section room-section">
+  <div class="room-bg">
+    <img src="/static/images/{{ c.img_room }}" alt="{{ ui.room_tag }}" loading="lazy" onerror="this.style.opacity='0'" />
+    <div class="room-overlay"></div>
+  </div>
+  <div class="container room-content" data-reveal>
+    <span class="section-tag light">{{ ui.room_tag }} · {{ c.ngo_short }}</span>
+    <h2 class="section-title light">{{ c.room_title }}</h2>
+    <p class="room-desc">{{ c.room_desc }}</p>
+    <div class="room-icons">
+      <div class="room-icon"><span>🏫</span><p>{{ ui.school }}</p></div>
+      <div class="room-icon"><span>🍳</span><p>{{ ui.kitchen }}</p></div>
+      <div class="room-icon"><span>🏠</span><p>{{ ui.living_area }}</p></div>
+    </div>
+    <a href="{{ url_for('donate', lang=current_lang) }}" class="btn-primary large">{{ ui.maintain_space }}</a>
+  </div>
+</section>
+
+<!-- ═══ IMPACT ════════════════════════════════════════════════════════════ -->
+<section class="section impact-section" id="impact">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <span class="section-tag">{{ ui.impact_tag }}</span>
+      <h2 class="section-title">{{ ui.numbers_title }}</h2>
+    </div>
+    <div class="impact-grid">
+      <div class="impact-card" data-reveal>
+        <div class="impact-icon">🌿</div>
+        <div class="impact-number" data-count="{{ c.stat_years }}">0</div>
+        <div class="impact-unit">{{ ui.years }}</div>
+        <div class="impact-label">{{ ui.service_years }}</div>
+      </div>
+      <div class="impact-card" data-reveal>
+        <div class="impact-icon">👩</div>
+        <div class="impact-number" data-count="{{ c.stat_women }}">0</div>
+        <div class="impact-unit">{{ ui.women }}</div>
+        <div class="impact-label">{{ ui.empowered_women }}</div>
+      </div>
+      <div class="impact-card" data-reveal>
+        <div class="impact-icon">🏳️‍⚧️</div>
+        <div class="impact-number" data-count="{{ c.stat_trans }}">0</div>
+        <div class="impact-unit">{{ ui.trans_people }}</div>
+        <div class="impact-label">{{ ui.shelter_support }}</div>
+      </div>
+      <div class="impact-card" data-reveal>
+        <div class="impact-icon">📚</div>
+        <div class="impact-number" data-count="{{ c.stat_children }}">0</div>
+        <div class="impact-unit">{{ ui.children }}</div>
+        <div class="impact-label">{{ ui.school_attendance }}</div>
+      </div>
+      <div class="impact-card" data-reveal>
+        <div class="impact-icon">🍱</div>
+        <div class="impact-number" data-count="{{ c.stat_meals }}">0</div>
+        <div class="impact-unit">{{ ui.meals }}</div>
+        <div class="impact-label">{{ ui.meals_served }}</div>
+      </div>
+      <div class="impact-card" data-reveal>
+        <div class="impact-icon">🏘️</div>
+        <div class="impact-number" data-count="{{ c.stat_villages }}">0</div>
+        <div class="impact-unit">{{ ui.villages }}</div>
+        <div class="impact-label">{{ ui.villages_reached }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GALLERY ════════════════════════════════════════════════════════════ -->
+<section class="section gallery-section" id="gallery">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <span class="section-tag">{{ ui.gallery_tag }}</span>
+      <h2 class="section-title">{{ ui.gallery_title }}</h2>
+      <p class="section-sub">{{ ui.gallery_intro }}</p>
+    </div>
+    <div class="gallery-grid" data-reveal>
+      <div class="gallery-item tall"><img src="/static/images/{{ c.img_g1 }}" alt="{{ ui.gallery_image_alt }} 1" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" /></div>
+      <div class="gallery-item"><img src="/static/images/{{ c.img_g2 }}" alt="{{ ui.gallery_image_alt }} 2" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" /></div>
+      <div class="gallery-item"><img src="/static/images/{{ c.img_g3 }}" alt="{{ ui.gallery_image_alt }} 3" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" /></div>
+      <div class="gallery-item wide"><img src="/static/images/{{ c.img_g4 }}" alt="{{ ui.gallery_image_alt }} 4" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" /></div>
+      <div class="gallery-item"><img src="/static/images/{{ c.img_g5 }}" alt="{{ ui.gallery_image_alt }} 5" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" /></div>
+      <div class="gallery-item"><img src="/static/images/{{ c.img_g6 }}" alt="{{ ui.gallery_image_alt }} 6" loading="lazy" onerror="this.parentElement.classList.add('img-placeholder')" /></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DONATE CTA ════════════════════════════════════════════════════════ -->
+<section class="donate-cta-section">
+  <div class="container donate-cta-inner" data-reveal>
+    <div class="donate-cta-text">
+      <h2>{{ c.cta_title }}</h2>
+      <p>{{ c.cta_desc }}</p>
+    </div>
+    <a href="{{ url_for('donate', lang=current_lang) }}" class="btn-primary xlarge pulse">{{ ui.secure_donate }}</a>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ════════════════════════════════════════════════════════════ -->
+<section class="section contact-section" id="contact">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <span class="section-tag">{{ ui.contact_tag }}</span>
+      <h2 class="section-title">{{ ui.contact_title }}</h2>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info" data-reveal>
+        <div class="contact-item">
+          <span class="contact-icon">📍</span>
+          <div><strong>{{ ui.address }}</strong><p>{{ c.ngo_address }}</p></div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📧</span>
+          <div><strong>{{ ui.email }}</strong><p><a href="mailto:{{ c.ngo_email }}">{{ c.ngo_email }}</a></p></div>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📞</span>
+          <div><strong>{{ ui.phone }}</strong><p><a href="tel:{{ c.ngo_phone }}">{{ c.ngo_phone }}</a></p></div>
+        </div>
+        <div class="contact-social">
+          <a href="{{ c.social_facebook }}" target="_blank" aria-label="{{ ui.facebook_alt }}">f</a>
+          <a href="{{ c.social_instagram }}" target="_blank" aria-label="{{ ui.instagram_alt }}">📷</a>
+          <a href="{{ c.social_youtube }}" target="_blank" aria-label="{{ ui.youtube_alt }}">▶</a>
+          <a href="{{ c.social_whatsapp }}" target="_blank" aria-label="{{ ui.whatsapp_alt }}">💬</a>
+        </div>
+      </div>
+      <form class="contact-form" data-reveal id="contactForm">
+        <div class="form-row">
+          <input type="text" name="name" placeholder="{{ ui.your_name }}" required />
+          <input type="email" name="email" placeholder="{{ ui.email_address }}" required />
+        </div>
+        <input type="text" name="subject" placeholder="{{ ui.subject }}" />
+        <textarea name="message" placeholder="{{ ui.your_message }}" rows="5" required></textarea>
+        <button type="submit" class="btn-primary">{{ ui.send_message }}</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo-emblem large">🌿</div>
+      <p class="footer-name">{{ c.ngo_name }}</p>
+      <p class="footer-tagline">{{ c.footer_tagline }}</p>
+    </div>
+    <div class="footer-links">
+      <h4>{{ ui.quick_links }}</h4>
+      <a href="#about">{{ ui.about_us }}</a>
+      <a href="#causes">{{ ui.nav_causes }}</a>
+      <a href="#impact">{{ ui.nav_impact }}</a>
+      <a href="{{ url_for('donate', lang=current_lang) }}">{{ ui.donate_now }}</a>
+      <a href="#contact">{{ ui.nav_contact }}</a>
+    </div>
+    <div class="footer-causes">
+      <h4>{{ ui.our_work }}</h4>
+      <span>👩 {{ c.women_title }}</span>
+      <span>🏳️‍⚧️ {{ c.trans_title }}</span>
+      <span>📚 {{ c.children_title }}</span>
+      <span>🍳 {{ ui.ticker_kitchen }}</span>
+    </div>
+    <div class="footer-donate">
+      <h4>{{ ui.support_us }}</h4>
+      <p>{{ ui.donation_impact }}</p>
+      <a href="{{ url_for('donate', lang=current_lang) }}" class="btn-footer-donate">{{ ui.donate_now }}</a>
+      <p class="footer-legal">{{ ui.donation_security }}</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 {{ c.ngo_name }} · {{ ui.open_source }} · {{ ui.ticker_location }}</p>
+    <p>{{ ui.footer_built }}</p>
+  </div>
+</footer>
+
+<script>window.PUBLIC_UI = {{ ui | tojson }};</script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

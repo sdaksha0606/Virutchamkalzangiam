@@ -1,0 +1,5 @@
+.env
+admin_data/auth.json
+admin_data/auth.json.tmp
+__pycache__/
+*.py[cod]
