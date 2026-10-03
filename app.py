@@ -106,8 +106,8 @@ twilio_client = TwilioClient(TWILIO_SID, TWILIO_TOKEN)
 # ── Admin credentials ──────────────────────────────────────────────────────────
 # IMPORTANT: Set these in your .env file — only office staff should know them.
 # Donors / website visitors have NO link to /admin anywhere on the public site.
-ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+ADMIN_USERNAME = (os.environ.get("ADMIN_USERNAME") or "").strip()
+ADMIN_PASSWORD = (os.environ.get("ADMIN_PASSWORD") or "").strip()
 OFFICE_RECOVERY_EMAIL = os.environ.get("OFFICE_RECOVERY_EMAIL", "").strip().lower()
 print("DEBUG admin user set:", bool(ADMIN_USERNAME), len(ADMIN_USERNAME or ""),
       "| pass set:", bool(ADMIN_PASSWORD), len(ADMIN_PASSWORD or ""), flush=True)
@@ -537,8 +537,9 @@ def admin_login():
         "reset": "Your password was reset. Sign in with the new password.",
     }.get(request.args.get("status"))
     if request.method == "POST":
-        u = request.form.get("username", "")
-        p = request.form.get("password", "")
+       error = "Invalid username or password."
+print("LOGIN FAIL | typed user len", len(u), "expected", len(ADMIN_USERNAME),
+      "| typed pass len", len(p), "expected", len(ADMIN_PASSWORD), flush=True)
         # Constant-time comparison to avoid timing attacks
         valid_user = bool(ADMIN_USERNAME) and hmac.compare_digest(u, ADMIN_USERNAME)
         valid_pass = verify_admin_password(p)
