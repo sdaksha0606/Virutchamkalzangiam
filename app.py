@@ -537,10 +537,8 @@ def admin_login():
         "reset": "Your password was reset. Sign in with the new password.",
     }.get(request.args.get("status"))
     if request.method == "POST":
-       error = "Invalid username or password."
-print("LOGIN FAIL | typed user len", len(u), "expected", len(ADMIN_USERNAME),
-      "| typed pass len", len(p), "expected", len(ADMIN_PASSWORD), flush=True)
-        # Constant-time comparison to avoid timing attacks
+        u = request.form.get("username", "").strip()
+        p = request.form.get("password", "").strip()
         valid_user = bool(ADMIN_USERNAME) and hmac.compare_digest(u, ADMIN_USERNAME)
         valid_pass = verify_admin_password(p)
         if valid_user and valid_pass:
@@ -552,8 +550,9 @@ print("LOGIN FAIL | typed user len", len(u), "expected", len(ADMIN_USERNAME),
                 nxt = url_for("admin_dashboard")
             return redirect(nxt)
         error = "Invalid username or password."
+        print("LOGIN FAIL | typed user len", len(u), "expected", len(ADMIN_USERNAME),
+              "| typed pass len", len(p), "expected", len(ADMIN_PASSWORD), flush=True)
     return render_template("admin/login.html", error=error, message=message)
-
 
 @app.route("/admin/forgot-password", methods=["GET", "POST"])
 def admin_forgot_password():
