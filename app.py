@@ -109,8 +109,11 @@ twilio_client = TwilioClient(TWILIO_SID, TWILIO_TOKEN)
 ADMIN_USERNAME = (os.environ.get("ADMIN_USERNAME") or "").strip()
 ADMIN_PASSWORD = (os.environ.get("ADMIN_PASSWORD") or "").strip()
 OFFICE_RECOVERY_EMAIL = os.environ.get("OFFICE_RECOVERY_EMAIL", "").strip().lower()
-print("DEBUG admin user set:", bool(ADMIN_USERNAME), len(ADMIN_USERNAME or ""),
-      "| pass set:", bool(ADMIN_PASSWORD), len(ADMIN_PASSWORD or ""), flush=True)
+if not ADMIN_USERNAME or not ADMIN_PASSWORD:
+    app.logger.warning(
+        "Admin login credentials are not fully configured. Set ADMIN_USERNAME "
+        "and ADMIN_PASSWORD in the hosting service environment."
+    )
 SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "")
@@ -338,6 +341,13 @@ def load_auth_store():
         return {}
 
 
+if "password_hash" in load_auth_store():
+    app.logger.info(
+        "A saved admin password hash is present and takes precedence over "
+        "ADMIN_PASSWORD."
+    )
+
+
 def save_auth_store(data):
     temporary_file = AUTH_FILE + ".tmp"
     with open(temporary_file, "w", encoding="utf-8") as f:
@@ -359,6 +369,7 @@ def verify_admin_password(password):
         salt = bytes.fromhex(auth_data["password_salt"])
         expected_hash = bytes.fromhex(auth_data["password_hash"])
     except (KeyError, TypeError, ValueError):
+        app.logger.warning("The stored admin password hash is invalid.")
         return False
     candidate_hash = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 600_000)
     return hmac.compare_digest(candidate_hash, expected_hash)
@@ -550,8 +561,6 @@ def admin_login():
                 nxt = url_for("admin_dashboard")
             return redirect(nxt)
         error = "Invalid username or password."
-        print("LOGIN FAIL | typed user len", len(u), "expected", len(ADMIN_USERNAME),
-              "| typed pass len", len(p), "expected", len(ADMIN_PASSWORD), flush=True)
     return render_template("admin/login.html", error=error, message=message)
 
 @app.route("/admin/forgot-password", methods=["GET", "POST"])
